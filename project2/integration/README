@@ -1,0 +1,5 @@
+In this directory, we have included the following:
+  - Updated server code that properly reads in the XML
+  - Updated client code to remove errors
+    - Did not fix triangular inequality implementation
+  - Log files of the output of tests that were run

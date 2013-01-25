@@ -1,0 +1,47 @@
+Note: Upon the original testing, all test cases returned a fatal error. This 
+was due to the way the xml data was read from standard input. After fixing 
+this, all tests ran without the errors, but no test cases passed. We discovered
+that some functions in the Node class compared labels, which were Strings, in 
+the incorrect way. After fixing this, these are the results of the test cases:
+
+Test Case 0: 
+	Passes
+
+Test Case 1: 
+  The error was in server. Upon request to join two graphs, labeled "to" and
+  "add", we mutate "to" to include "add", per specification, and then remove
+  "add" from server storage, causing an error when "add" is accessed again.
+
+Test Case 2:
+	The error was in the graph library. The graph input violated triangular
+	inequality, but the library did not catch and report the error as 
+	requested. The graph was created successfully instead of returning an error.
+
+Test Case 3:
+	Passes
+
+Test Case 4:
+	The error was in our server. If the input requests the server to find a path,
+	but the path query contains a node not found in the specified graph, we 
+	return an error message instead of the expected <false /> response.
+
+Test Case 5:
+	Passes
+
+Test Case 6:
+	The error was in the graph library. The graph input violated triangular
+  inequality, but the library did not catch and report the error as 
+  requested. The graph was created successfully instead of returning an error.
+
+Test Case 7:
+  The error was in the graph library. A graph input violated triangular 
+  inequality, but the library did not catch and report the error as 
+  requested. The graph was created successfully instead of returning an error.
+
+Test Case 8:
+  The error was in the graph library. The graph input violated triangular
+  inequality, but the library did not catch and report the error as 
+  requested. The graph was created successfully instead of returning an error.
+
+Test Case 9:
+	Passes

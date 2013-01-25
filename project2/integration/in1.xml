@@ -1,0 +1,5 @@
+<graph name="graph1"><edge from="a" to="b" cost=".5" /></graph>
+<graph name="graph2"><edge from="c" to="d" cost=".5" /></graph>
+<join add="graph1" to="graph2" />
+<path graph="graph1" from="a" to="b" />
+

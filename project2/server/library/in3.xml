@@ -1,0 +1,6 @@
+<graph name="graph2">
+  <edge from="a" to="b" cost=".5" />
+  <edge from="a" to="c" cost=".5" />
+</graph>
+<path graph="graph2" from="b" to="c" />
+

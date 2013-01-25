@@ -1,0 +1,157 @@
+#! /bin/sh
+#|
+exec racket -tm "$0" ${1+"$@"}
+|#
+
+#lang racket
+
+;; ---------------------------------------------------------------------------------------------------
+;; compare two xml streams 
+
+(provide
+ ;; String String -> Boolean 
+ ;; effect: spit out distinct XML elements 
+ main)
+
+;; if you want to see these messages in error elements
+(define verbose (make-parameter #f))
+
+;; ---------------------------------------------------------------------------------------------------
+
+(require xml)
+
+(define (main file1 file2)
+  (define ip1 (open-file-or-port file1))
+  (define ip2 (open-file-or-port file2))
+  (if (diff ip1 ip2) 'success '**failure**))
+
+;; String -> InputPort 
+(define (open-file-or-port file1)
+  (cond
+    [(string=? "-" file1) (current-input-port)]
+    [(file-exists? file1) (open-input-file file1)]
+    [else (error 'diff-xml "file not found: ~e" file1)]))
+
+;; InputPort InputPort -> Boolean 
+(define (diff ip1 ip2)
+  (define (diff1 t ip next)
+    (let diff1 ([next next])
+      (unless (eof-object? next)
+        (printf "additional lines in ~a:\n" t)
+        (pretty-print next)
+        (diff1 (read-xml-from-stdin ip))))
+    #f)
+  (let diff ([result #t])
+    (define in1 (read-xml-from-stdin ip1))
+    (define in2 (read-xml-from-stdin ip2))
+    (cond
+      [(and (eof-object? in1) (eof-object? in2)) result]
+      [(eof-object? in1) (diff1 2 ip2 in2)]
+      [(eof-object? in2) (diff1 1 ip1 in1)]
+      [else (diff (xml-element-diff in1 in2))])))
+
+;; InputPort -> Xexpr 
+(define (read-xml-from-stdin ip)
+  (with-handlers ((exn:xml? (λ (x) eof)))
+    (xml->xexpr ((eliminate-whitespace '() (λ (x) #t)) (read-xml/element ip)))))
+
+;; Xexpr Xexpr -> Boolean 
+(define (xml-element-diff x y)
+  (define x-tag (first x))
+  (define y-tag (first y))
+  (cond 
+    [(eq? x-tag y-tag) (xml-attribute-diff x-tag (rest x) (rest y))]
+    [else (printf "distinct elements:\n")
+          (printf "  1: ~e\n" x-tag)
+          (printf "  2: ~e\n" y-tag)
+          #f]))
+
+;; Xattr = empty | (cons Attributes [Listof Xexpr])
+;; SyXattr Xattr -> Boolean 
+(define (xml-attribute-diff tag attr+body1 attr+body2)
+  (cond
+    [(and (empty? attr+body1) (empty? attr+body2)) #t]
+    [(empty? attr+body1) 
+     (printf "distinct attributes:\n")
+     (printf "  1: empty\n")
+     (printf "  2: ~e\n" attr+body2)
+     #f]
+    [(empty? attr+body2)
+     (printf "distinct attributes:\n")
+     (printf "  1: ~e\n" attr+body1)
+     (printf "  2: empty\n")
+     #f]
+    [else 
+     (define-values (x-attr x-err) (normalize-attribute tag (first attr+body1)))
+     (define-values (y-attr y-err) (normalize-attribute tag (first attr+body2)))
+     (cond
+       [(equal? x-attr y-attr) 
+        (when (and x-err (verbose))
+          (printf "error messages:\n")
+          (printf "  1: ~a\n" x-err)
+          (printf "  2: ~a\n" y-err))
+        (define body1 (rest attr+body1))
+        (define body2 (rest attr+body2))
+        (cond
+          [(= (length body1) (length body2))
+           (andmap xml-element-diff body1 body2)]
+          [else 
+           (printf "distinct element body list:\n")
+           (printf "  1: ~e\n" body1)
+           (printf "  2: ~e\n" body2)
+           #f])]
+       [else (printf "distinct attributes:\n")
+             (printf "  1: ~e\n" x-attr)
+             (printf "  2: ~e\n" y-attr)
+             #f])]))
+
+;; Symbol [Listof [List Symbol String]] ->* [Listof [List Symbol (U String Number)]] (U String false)
+(define (normalize-attribute tag a)
+  (define attr (sort a symbol<=? #:key first))
+  (define msg #f)
+  (values (for/list ((a attr))
+            (define val (second a))
+            (cond
+              [(eq? 'error tag) (set! msg val) (list (first a) "")]
+              [else (define num (string->number val))
+                    (list (first a) (or  num val)) #f])) 
+          ;; relying on left-to-right order here:
+          msg))
+
+(define (symbol<=? s t)
+  (string<=? (symbol->string s) (symbol->string t)))
+
+(define (tee t v)
+  (displayln `(,t ,v))
+  v)
+
+;; ---------------------------------------------------------------------------------------------------
+(module+ test
+  (require rackunit)
+  
+  (check-true (xml-element-diff '(p) '(p)))
+  (check-true (xml-element-diff '(p ((a1 "hello"))) '(p ((a1 "hello")))))
+  (check-true (xml-element-diff '(p ((a2 "world") (a1 "hello"))) '(p ((a1 "hello") (a2 "world")))))
+  (check-true
+   (xml-element-diff
+    '(p ((a2 "world") (a1 "hello")) (a) (b))
+    '(p ((a1 "hello") (a2 "world")) (a) (b))))
+  (check-true
+   (xml-element-diff
+    '(p ((a2 "world") (a1 "hello")) (a ((a2 "world") (a1 "hello"))) (b))
+    '(p ((a1 "hello") (a2 "world")) (a ((a2 "world") (a1 "hello"))) (b))))
+  (check-true
+   (xml-element-diff
+    '(p ((a2 "world") (a1 ".5")) (a ((a2 "world") (a1 "hello"))) (b))
+    '(p ((a1 "0.5") (a2 "world")) (a ((a2 "world") (a1 "hello"))) (b))))
+  (check-true (xml-element-diff '(error [[msg "a"]]) '(error [[msg "b"]])))
+  
+  (check-false
+   (xml-element-diff
+    '(p ((a2 "world") (a1 ".5")) (a) (b))
+    '(p ((a1 "hello") (a2 "world")) (a) (b) (c))))
+  (check-false
+   (xml-element-diff
+    '(p ((a2 "world") (a1 "hello")) (a) (b))
+    '(p ((a1 "hello") (a2 "world")) (a) (b) (c))))
+  )

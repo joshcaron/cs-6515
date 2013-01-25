@@ -1,0 +1,10 @@
+Contents 
+- original
+  - Contains logs of the output of tests ran during the original integration
+    of server code and client code with no edits
+- uclient
+  - Contains logs of the output of tests ran with untouched client code but
+    revised server code
+- revised
+  - Contains logs of the output of tests ran with revised server code and 
+    revised client code

@@ -1,0 +1,7 @@
+[Fatal Error] :1:139: The markup in the document following the root element must be well-formed.
+additional lines in 1:
+'(path
+  ((cost ".6"))
+  (edge ((cost ".3") (from "b") (to "a")))
+  (edge ((cost ".3") (from "a") (to "c"))))
+'**failure**

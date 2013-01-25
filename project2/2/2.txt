@@ -1,0 +1,46 @@
+REQUESTS
+graph = Graph
+join = <join add=GraphName to=GraphName />
+path = <path graph=GraphName from=NodeName to=NodeName />
+add = <add name=GraphName>…EdgeDescripttion…</add>
+remove = <remove name=GraphName>…EdgeDescription…</remove>
+delete = <delete name=GraphName />
+get = <get name=GraphName />
+
+
+RESPONSES
+Graph
+error = <error msg=Error />
+false = <false />
+success = <success />
+pathDescription = <path cost=Cost>…EdgeDescription…</path>
+egraph = <e>…EdgeDescription... Graph</e>
+
+
+AUXILIARY DESCRIPTIONS
+EdgeDescription = <edge cost=Cost from=NodeName to=NodeName />
+Cost = A positive real number in school book decimal notation
+GraphName = String that is a unique identifier for a Graph
+NodeName = String that is a unique identifier for a Node
+Error = String that is a descriptive error message
+Graph = <graph name=GraphName public=Boolean>…EdgeDescription…</graph>
+Boolean = String representing True or False
+public = If true, any client can access this graph.
+
+
+REQUEST DESCRIPTIONS
+graph = Adds a new graph to the sever; returns success or error
+join = Joins two graphs together; returns success or error
+path = Finds the path between two nodes on the graph; returns false if path isn't found, pathDescription if found, or error
+add = Adds edges to the graph; returns success or error
+remove = Removes edges from the graph; returns egraph or error
+delete = Deletes a graph; returns success or error
+get = Returns a graph or error
+
+
+RESPONSE DESCRIPTIONS
+error = Returned if something goes wrong
+false = Return if a path isn't found
+success = Returned upon successful completion of a request
+pathDescription = Includes the cost of the path and the edges in the path
+egraph = Returns the removed edges and the resulting graph

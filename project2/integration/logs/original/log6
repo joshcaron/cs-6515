@@ -1,0 +1,4 @@
+[Fatal Error] :1:139: The markup in the document following the root element must be well-formed.
+additional lines in 1:
+'(error ((msg "something about non exsiting graph")))
+'**failure**

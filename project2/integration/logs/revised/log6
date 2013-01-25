@@ -1,0 +1,6 @@
+distinct elements:
+  1: 'error
+  2: 'false
+additional lines in 1:
+'(error ((msg "something about non exsiting graph")))
+'**failure**

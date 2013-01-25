@@ -1,0 +1,2 @@
+<error msg="triangle inequality"></error>
+<path cost=".6"><edge from="b" to="a" cost=".3" /><edge from="a" to="c" cost=".3" /></path>

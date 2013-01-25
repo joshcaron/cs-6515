@@ -1,0 +1,7 @@
+<graph name="graph1">
+  <edge from="x" to="y" cost="1" />
+  <edge from="y" to="z" cost="1" />
+  <edge from="x" to="y" cost="2" />
+  <edge from="x" to="z" cost="1" />
+  <edge from="x" to="z" cost="4" />
+</graph>
