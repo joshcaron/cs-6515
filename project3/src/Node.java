@@ -1,5 +1,9 @@
-// Represents a Node of a Graph
-interface Node {
-  // Return the label of this Node
-  String getLabel();
+// A "Node" is a point on the graph
+public interface Node
+{	
+	// Sets the data contained within the node
+	void setLabel(String s);
+	
+	// Returns the data within the node
+	String getLabel();
 }

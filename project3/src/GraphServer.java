@@ -16,7 +16,7 @@ public class GraphServer {
 	GraphReader reader; // Auxillary Class to deal with reading xml data
     ServerSocket server;
     Socket connection; // Connection via TCP/IP
-    static final Integer PORT = 9999;
+    static final Integer PORT = 5432;
     static InputStream input;
     static PrintStream output;
     static Boolean DEBUG = true;	
@@ -43,6 +43,8 @@ public class GraphServer {
             output = new PrintStream(connection.getOutputStream());
         } catch (IOException e) {
             if(DEBUG) { System.out.println("Error getting streams."); }
+        } catch (NullPointerException e) {
+        	if(DEBUG) { System.out.println("Error connecting. Check to make sure port isn't in use."); }
         }
     }
 
@@ -86,7 +88,7 @@ public class GraphServer {
                 System.out.println("client> " + msg);
                 response = gr.processXML(xml);
                 output.println(response);
-
+                System.out.println("response> " + response);
                 msg = reader.readLine();
             }
         } catch(IOException e) {

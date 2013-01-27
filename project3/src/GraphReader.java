@@ -107,91 +107,96 @@ public class GraphReader {
 			if (elem.equals("#text")) {
 				continue;
 			}
-			if (elem.equals("graph")) {
-				response = this.addGraph(child);
-				if (DEBUG) { System.out.println("Graph made!"); }
-			} else if (elem.equals("join")) {
+
+			if (elem.equals("join")) {
 				response = this.joinGraph(child);
 				if (DEBUG) { System.out.println("Graphs joined!"); }
 			} else if (elem.equals("path")) {
 				response = this.findPath(child);
-				if (DEBUG) { System.out.println("Well, we need to implement path..."); }
+				if (DEBUG) { System.out.println("Path made!"); }
+			} else if (elem.equals("nodes")) {
+				response = this.getNodes(child);
+				if (DEBUG) { System.out.println("Nodes found!"); }
+			} else if (elem.equals("new")) {
+				response = this.getNewGraph(child);
+				if (DEBUG) { System.out.println("Graph made!"); }
 			} else {
-				response = this.xmlError("Unrecognized GraphDescription");
+				response = this.xmlError("Unrecognized request");
 			}
 		}
-		
 		
 		return response;
 	}
-	
-	CostInterval getCostInterval(Element root) {
-		NamedNodeMap attributes;
-		String childName;
-		Double cost;
-		Vector<Double> costs = new Vector<Double>();
-		
-		
-		return new CostInterval(costs);
+
+	// Retuns an XML representation of a new empty graph
+	private String getNewGraph(org.w3c.dom.Node root) {
+		if (root.hasChildNodes()) {
+			return this.xmlError("New request cannot contain other XML");
+		}
+
+		Double low;
+		Double high;
+
+		try {
+			low = Double.parseDouble(root.getAttributes().getNamedItem("low").getNodeValue());
+			high = Double.parseDouble(root.getAttributes().getNamedItem("high").getNodeValue());
+		} catch (NullPointerException e) {
+			return this.xmlError("New request must provide a low and high cost interval");
+		} catch (NumberFormatException e) {
+			return this.xmlError("Low and high attributes must be properly formatted doubles.");
+		}
+
+		Graph g = new GraphExample(low, high);
+
+		return this.getGraphDescription(g);
 	}
-	
-	// Creates a graph from the xml data and adds it to the storage in 
-	// server. Returns the response to be printed as output, which is 
-	// empty if it succeeded. Otherwise, the output is an error message
-	// describing what went wrong.
-	String addGraph(org.w3c.dom.Node root) {
-		
-		NodeList edges = root.getChildNodes();
-		String graphName = root.getAttributes().getNamedItem("name").getNodeValue();
-		if (DEBUG) { System.out.println(edges.getLength()); 
-					 System.out.println(graphName);
+
+	// Returns an XML representation of all the nodes in the given graph extracted from
+	// the org.w3c.dom.Node
+	private String getNodes(org.w3c.dom.Node root) {
+		Graph g;
+
+		try {
+			g = this.makeGraph(root.getFirstChild());	
+		} catch (IllegalArgumentException e) {
+			return this.xmlError(e.getMessage());
 		}
 		
-		if(graphName.equals("")) {
-			return this.xmlError("Graph name not specified.");
+		if (root.getFirstChild().getNextSibling() != null) {
+			return this.xmlError("Nodes request can only contain one graph.");
 		}
-		
-		// TODO 
-		// Class name will change based upon library implementation
-		GraphFactory gf = new CGraphFactory();
-		Graph graph;
+
+		String response = "<nodes>";
+		Vector<Node> nodes = g.getNodes();
+		for (Node n : nodes) {
+			response += n.getNodeDescription();
+		}
+
+		return response + "</nodes>"
+	}
+
+
+	// Creates a graph from the xml data and returns it
+	private Graph makeGraph(org.w3c.dom.Node root) {
+		Graph graph = new GraphExample(low, high);
 		NamedNodeMap attributes;
 		Double cost;
-		CostInterval ci;
 		String from;
 		String to;
 		String childName;
-		Vector<Double> costs = new Vector<Double>();
-		
-		for(org.w3c.dom.Node child = root.getFirstChild(); 
-			child != null; 
-			child = child.getNextSibling()) {
-			
-			childName = child.getNodeName();
-			if( childName.equals("#text")) {
-				continue;
-			}
-			
-			if( !child.getNodeName().equals("edge") ) {
-				return this.xmlError("Graph child is not an edge.");
-			}
-			
-			attributes = child.getAttributes();
-			
-			try {
-				cost = Double.parseDouble(attributes.getNamedItem("cost").getNodeValue());
-				costs.add(cost);
-			} catch(NumberFormatException e) {
-				return this.xmlError("Cost attribute does not have the correct format.");
-			} catch(NullPointerException e) {
-                return this.xmlError("cost attribute in edge must be present");
-            // TODO: ADDED
-            }
+		NodeList edges = root.getChildNodes();
+		Double low;
+		Double high;
+
+		try {
+			low = Double.parseDouble(root.getAttributes().getNamedItem("low").getNodeValue());
+			high = Double.parseDouble(root.getAttributes().getNamedItem("high").getNodeValue());
+		} catch(NumberFormatException e) {
+			if (DEBUG) { System.out.println("Error getting low/high cost"); }
+			throw e;
 		}
-		
-		ci = new CostInterval(costs);
-		
-		graph = gf.createGraph(ci.getMin(), ci.getMax());
+
+		if (DEBUG) { System.out.println(edges.getLength()); }
 		
 		for(org.w3c.dom.Node child = root.getFirstChild(); 
 			child != null; 
@@ -203,7 +208,7 @@ public class GraphReader {
 			}
 			
 			if( !child.getNodeName().equals("edge") ) {
-				return this.xmlError("Graph child is not an edge.");
+				throw new IllegalArgumentException("Graph child is not an edge.");
 			}
 			
 			attributes = child.getAttributes();
@@ -218,59 +223,67 @@ public class GraphReader {
 				this.addEdgeToGraph(graph, from, to, cost);
 
 			} catch(NumberFormatException e) {
-				return this.xmlError("cost attribute in edge must be a valid double.");
+				throw new IllegalArgumentException("cost attribute in edge must be a valid double.");
 			} catch(NullPointerException e) {
-				return this.xmlError("all values in edge must be non-null and present");
+				throw new IllegalArgumentException("all values in edge must be non-null and present");
 			} catch (Exception e) {
-				return this.xmlError("invalid edge");
+				throw new IllegalArgumentException("invalid edge");
 			}
 		}
 		
-		this.server.addGraph(graphName, graph);
-		
-		return "";
+		return graph;
 	}
-	
+
 	// Join the two graphs specified by the xml together. Return a String that will 
 	// be returned to the user. The message is an empty string if successful, or an 
 	// error message describing what went wrong.
-	String joinGraph(org.w3c.dom.Node root) {
+	private String joinGraph(org.w3c.dom.Node root) {
 		if (DEBUG) {
 			System.out.println("In the join");
 		}
-		
-		String add = "";
-		String to = "";
-		NamedNodeMap attributes = root.getAttributes();
-		add = attributes.getNamedItem("add").getNodeValue();
-		to = attributes.getNamedItem("to").getNodeValue();
-		
-		if (add.equals("")) {
-			return this.xmlError("add must be present and not empty");
-		}
-		if (to.equals("")) {
-			return this.xmlError("to must be present and not empty");
-		}
-		
-		String hasGraphs = this.hasGraphs(add, to);
-		
-		if (!hasGraphs.equals("")) {
-			return hasGraphs;
-		} 
 
-		try {
-			Graph graph1 = this.server.getGraph(add);
-			Graph graph2 = this.server.getGraph(to);
-			
-			graph2.joinGraph(graph1);
-			
-			this.server.addGraph(to, graph2);
-			this.server.removeGraph(add);
-		} catch (Exception e) {
-			return this.xmlError("graphs exist but could not be joined.");
+		Graph add;
+		Graph to;
+		Graph joined;
+		Integer count = 0;
+
+		for(org.w3c.dom.Node child = root.getFirstChild(); child != null; child = child.getNextSibling()) {
+			count++;
+			try {
+				if (count.equals(1)) {
+					to = this.makeGraph(child);
+				} else if (count.equals(2)) {
+					add = this.makeGraph(child);
+				} else {
+					return this.xmlError("Can only join two graphs.");
+				}
+			} catch (IllegalArgumentException e) {
+				return this.xmlError(e.getMessage());
+			}
 		}
-		
-		return "";
+
+		joined = to.addGraph(add);
+
+		return this.getGraphDescription(joined);
+	}
+
+
+	private String getGraphDescription(Graph g) {
+		String response = "<graph ";
+		response += "low=\"" + g.getLowCostInterval() + "\" ";
+		response += "high=\"" + g.getHighCostInterval() + "\">";
+
+		Vector<Edges> edges = g.getEdges();
+
+		for (Edge e : edges) {
+			response += this.getEdgeDescription(e);
+		}
+
+		return response + "</graph>";
+	}
+
+	private String getNodeDescription(Node n) {
+		return "<node name=\"" + n.getLabel() + "\" />";
 	}
 	
 	private String hasGraphs(String add, String to) {
@@ -287,7 +300,7 @@ public class GraphReader {
 	// Finds a path specified by the xml. Returns a String that will be returned
 	// to the user. The message is a PathDescription if the path exists, <false />
 	// if the path does not exist, or an error message describing what went wrong.
-	String findPath(org.w3c.dom.Node root) {
+	private String findPath(org.w3c.dom.Node root) {
 
 		NamedNodeMap attributes = root.getAttributes();
 		String graphName = "";
@@ -333,18 +346,17 @@ public class GraphReader {
 		if (!graph.pathExists(origin, dest)) {
 			return "<false />";
 		} else {
-			Path path = graph.getPath(origin, dest);
-			cost = graph.pathCost(origin, dest);
+			Path path = graph.calculatePath(origin, dest);
+			cost = path.getTotalCost();
 			return this.getPathDescription(cost, path);
 		}
 	}
 
-	private String getPathDescription(Double cost, Path path) {
-		CPath p = (CPath) path;
+	private String getPathDescription(Double cost, Path p) {
 		String response = "<path cost=\"" + cost + "\">";
-		while (p.tail != null) {
-			response += this.getEdgeDescription(p.head, p.tail.head, p.getCost());
-			p = p.tail;
+		while (p.getTail() != null) {
+			response += this.getEdgeDescription(p.getHead(), p.getTail().getHead(), p.getCostToNext());
+			p = p.getTail();
 		}
 		response += "</path>";
 		return response;
@@ -355,6 +367,10 @@ public class GraphReader {
 		String tailName = tail.getLabel();
 		
 		return "<edge cost=\"" + cost + "\" from=\"" + headName + "\" to=\"" + tailName + "\" />";
+	}
+
+	private String getEdgeDescription(Edge e) {
+		return "<edge cost=\"" + e.getCost() + "\" from=\"" + e.getOrigin() + "\" to=\"" + e.getDest() + "\" />";
 	}
 
 
@@ -375,7 +391,7 @@ public class GraphReader {
 		
 		try {
 			if (DEBUG) {System.out.println("Trying to an edge..."); }
-			graph.addEdge(graph.getNode(from), graph.getNode(to), cost);
+			graph.addEdge(from, to, cost);
 			if (DEBUG) {System.out.println("Edge added!"); }
 		} catch (Exception e) {
 			if (DEBUG) {System.out.println("Adding edge failed!"); }
