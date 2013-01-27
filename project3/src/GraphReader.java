@@ -169,7 +169,7 @@ public class GraphReader {
 		String response = "<nodes>";
 		Vector<Node> nodes = g.getNodes();
 		for (Node n : nodes) {
-			response += n.getNodeDescription();
+			response += this.getNodeDescription(n);
 		}
 
 		return response + "</nodes>";
@@ -178,7 +178,6 @@ public class GraphReader {
 
 	// Creates a graph from the xml data and returns it
 	private Graph makeGraph(org.w3c.dom.Node root) {
-		Graph graph = new GraphExample(low, high);
 		NamedNodeMap attributes;
 		Double cost;
 		String from;
@@ -197,7 +196,9 @@ public class GraphReader {
 		}
 
 		if (DEBUG) { System.out.println(edges.getLength()); }
-		
+
+		Graph graph = new GraphExample(low, high);
+
 		for(org.w3c.dom.Node child = root.getFirstChild(); 
 			child != null; 
 			child = child.getNextSibling()) {
@@ -231,6 +232,7 @@ public class GraphReader {
 			}
 		}
 		
+		
 		return graph;
 	}
 
@@ -246,23 +248,23 @@ public class GraphReader {
 		Graph to;
 		Graph joined;
 		Integer count = 0;
+		org.w3c.dom.Node child = root.getFirstChild();
 
-		for(org.w3c.dom.Node child = root.getFirstChild(); child != null; child = child.getNextSibling()) {
-			count++;
-			try {
-				if (count.equals(1)) {
-					to = this.makeGraph(child);
-				} else if (count.equals(2)) {
-					add = this.makeGraph(child);
-				} else {
-					return this.xmlError("Can only join two graphs.");
-				}
-			} catch (IllegalArgumentException e) {
-				return this.xmlError(e.getMessage());
+		try {
+			to = this.makeGraph(child);
+			child = child.getNextSibling();
+			add = this.makeGraph(child);
+			child = child.getNextSibling();
+			if (child != null) {
+				return this.xmlError("Can only join two graphs.");
 			}
+		} catch (IllegalArgumentException e) {
+			return this.xmlError(e.getMessage());
+		} catch (NullPointerException e) {
+			return this.xmlError("There must be two graphs in a join request.");
 		}
 
-		joined = to.addGraph(add);
+		joined = to.joinGraph(add);
 
 		return this.getGraphDescription(joined);
 	}
@@ -273,7 +275,7 @@ public class GraphReader {
 		response += "low=\"" + g.getLowCostInterval() + "\" ";
 		response += "high=\"" + g.getHighCostInterval() + "\">";
 
-		Vector<Edges> edges = g.getEdges();
+		Vector<Edge> edges = g.getEdges();
 
 		for (Edge e : edges) {
 			response += this.getEdgeDescription(e);

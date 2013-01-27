@@ -1,3 +1,5 @@
+import java.util.Vector;
+
 public interface Graph
 {
 	// Set the cost interval of the graph. NOTE: Also implement this functionality
