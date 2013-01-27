@@ -172,7 +172,7 @@ public class GraphReader {
 			response += n.getNodeDescription();
 		}
 
-		return response + "</nodes>"
+		return response + "</nodes>";
 	}
 
 
