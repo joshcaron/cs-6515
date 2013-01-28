@@ -85,10 +85,10 @@ public class GraphServer {
             msg = reader.readLine();
             while(!msg.equals("bye")) {
                 xml = "<gs>" + msg + "</gs>";
-                System.out.println("client> " + msg);
+                System.out.println("client:    " + msg);
                 response = gr.processXML(xml);
                 output.println(response);
-                System.out.println("response> " + response);
+                System.out.println("response:  " + response);
                 msg = reader.readLine();
             }
         } catch(IOException e) {

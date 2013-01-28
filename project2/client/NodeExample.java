@@ -1,18 +1,18 @@
 
 public class NodeExample implements Node {
-	Object data;
+	String name;
 	
 	
-	NodeExample(Object data) {
-		this.data = data;
+	NodeExample(String name) {
+		this.name = name;
 	}
 	
-	public void setData(Object o) {
-		this.data = o;
+	public void setName(String o) {
+		this.name = o;
 	}
 
-	public Object getData() {
-		return this.data;
+	public String getName() {
+		return this.name;
 	}
 
 }

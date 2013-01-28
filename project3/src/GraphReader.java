@@ -131,7 +131,7 @@ public class GraphReader {
 	// Retuns an XML representation of a new empty graph
 	private String getNewGraph(org.w3c.dom.Node root) {
 		if (root.hasChildNodes()) {
-			return this.xmlError("New request cannot contain other XML");
+			return this.xmlError("New request cannot contain other XML.");
 		}
 
 		Double low;
@@ -141,7 +141,7 @@ public class GraphReader {
 			low = Double.parseDouble(root.getAttributes().getNamedItem("low").getNodeValue());
 			high = Double.parseDouble(root.getAttributes().getNamedItem("high").getNodeValue());
 		} catch (NullPointerException e) {
-			return this.xmlError("New request must provide a low and high cost interval");
+			return this.xmlError("New request must provide a low and high cost interval.");
 		} catch (NumberFormatException e) {
 			return this.xmlError("Low and high attributes must be properly formatted doubles.");
 		}
@@ -193,6 +193,14 @@ public class GraphReader {
 		} catch(NumberFormatException e) {
 			if (DEBUG) { System.out.println("Error getting low/high cost"); }
 			throw e;
+		}
+
+		if (low < 0 || high < 0) {
+			throw new IllegalArgumentException("Low and high must be positive real numbers.");
+		}
+
+		if (low > high) {
+			throw new IllegalArgumentException("High boundary must be greater than low boundary.")
 		}
 
 		if (DEBUG) { System.out.println(edges.getLength()); }
@@ -264,8 +272,11 @@ public class GraphReader {
 			return this.xmlError("There must be two graphs in a join request.");
 		}
 
-		joined = to.joinGraph(add);
-
+		try {
+			joined = to.joinGraph(add);
+		} catch (IllegalArgumentException e) {
+			return this.xmlError("Graphs must operate on the same cost interval.");
+		}
 		return this.getGraphDescription(joined);
 	}
 
