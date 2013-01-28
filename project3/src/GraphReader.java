@@ -120,6 +120,12 @@ public class GraphReader {
 			} else if (elem.equals("new")) {
 				response = this.getNewGraph(child);
 				if (DEBUG) { System.out.println("Graph made!"); }
+			} else if (elem.equals("edges")) {
+				response = this.getEdges(child);
+				if (DEBUG) { System.out.println("Edges made!"); }
+			} else if (elem.equals("add")) {
+				response = this.addNewEdge(child);
+				if (DEBUG) { System.out.println("Edge handled!"); }
 			} else {
 				response = this.xmlError("Unrecognized request");
 			}
@@ -136,6 +142,7 @@ public class GraphReader {
 
 		Double low;
 		Double high;
+		Graph g;
 
 		try {
 			low = Double.parseDouble(root.getAttributes().getNamedItem("low").getNodeValue());
@@ -144,9 +151,16 @@ public class GraphReader {
 			return this.xmlError("New request must provide a low and high cost interval.");
 		} catch (NumberFormatException e) {
 			return this.xmlError("Low and high attributes must be properly formatted doubles.");
-		}
+		} 
+		
+		g = new GraphExample(low, high);
 
-		Graph g = new GraphExample(low, high);
+		if (low < 0 || high < 0) {
+			return this.xmlError("Low and high must both be positive real numbers.");
+		}
+		if (low > high) {
+			return this.xmlError("Low value must not be greater than the high value.");
+		}
 
 		return this.getGraphDescription(g);
 	}
@@ -173,6 +187,30 @@ public class GraphReader {
 		}
 
 		return response + "</nodes>";
+	}	
+
+	// Returns an XML representation of all the nodes in the given graph extracted from
+	// the org.w3c.dom.Node
+	private String getEdges(org.w3c.dom.Node root) {
+		Graph g;
+
+		try {
+			g = this.makeGraph(root.getFirstChild());	
+		} catch (IllegalArgumentException e) {
+			return this.xmlError(e.getMessage());
+		}
+		
+		if (root.getFirstChild().getNextSibling() != null) {
+			return this.xmlError("Edges request can only contain one graph.");
+		}
+
+		String response = "<edges>";
+		Vector<Edge> edges = g.getEdges();
+		for (Edge e : edges) {
+			response += this.getEdgeDescription(e);
+		}
+
+		return response + "</edges>";
 	}
 
 
@@ -200,7 +238,7 @@ public class GraphReader {
 		}
 
 		if (low > high) {
-			throw new IllegalArgumentException("High boundary must be greater than low boundary.")
+			throw new IllegalArgumentException("High boundary must be greater than low boundary.");
 		}
 
 		if (DEBUG) { System.out.println(edges.getLength()); }
@@ -242,6 +280,40 @@ public class GraphReader {
 		
 		
 		return graph;
+	}
+
+	// Adds an edge generated from the given XML to the given graph from the XML
+	// so long as it does not violate triangular inequality
+	private String addNewEdge(org.w3c.dom.Node root) {
+		String from;
+		String to;
+		Double cost;
+		Graph g;
+		NamedNodeMap attributes = root.getAttributes();
+		try {
+			from = attributes.getNamedItem("from").getNodeValue();
+			to = attributes.getNamedItem("to").getNodeValue();
+			cost = Double.parseDouble(attributes.getNamedItem("cost").getNodeValue());
+			g = this.makeGraph(root.getFirstChild());	
+		} catch (NullPointerException e) {
+			return this.xmlError("From, to, and cost attributes must be present and non-null.");
+		} catch (NumberFormatException e) {
+			return this.xmlError("Cost attribute must be a positive real number.");
+		} catch (IllegalArgumentException e) {
+			return this.xmlError(e.getMessage());
+		}
+		
+		if (root.getFirstChild().getNextSibling() != null) {
+			return this.xmlError("Add request can only add edge to one graph.");
+		}
+
+		try {
+			this.addEdgeToGraph(g, from, to, cost);
+		} catch (IllegalArgumentException e) {
+			return this.xmlError(e.getMessage());
+		}
+		return this.getGraphDescription(g);
+
 	}
 
 	// Join the two graphs specified by the xml together. Return a String that will 
@@ -383,13 +455,13 @@ public class GraphReader {
 	}
 
 	private String getEdgeDescription(Edge e) {
-		return "<edge cost=\"" + e.getCost() + "\" from=\"" + e.getOrigin() + "\" to=\"" + e.getDest() + "\" />";
+		return "<edge cost=\"" + e.getCost() + "\" from=\"" + e.getOrigin().getLabel() + "\" to=\"" + e.getDest().getLabel() + "\" />";
 	}
 
 
 	// Adds an edge to the Graph from the node labeled from to the node with the label
 	// to with the given cost. Adds Nodes to the graph if necessary.
-	private void addEdgeToGraph(Graph graph, String from, String to, Double cost) throws Exception {
+	private void addEdgeToGraph(Graph graph, String from, String to, Double cost) {
 		
 		if (DEBUG) { System.out.println("Adding edges..."); }
 		
@@ -406,7 +478,7 @@ public class GraphReader {
 			if (DEBUG) {System.out.println("Trying to an edge..."); }
 			graph.addEdge(from, to, cost);
 			if (DEBUG) {System.out.println("Edge added!"); }
-		} catch (Exception e) {
+		} catch (IllegalArgumentException e) {
 			if (DEBUG) {System.out.println("Adding edge failed!"); }
 			if (DEBUG) {System.out.println(e.getMessage()); }
 			throw e;

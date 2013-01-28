@@ -106,6 +106,9 @@ public class GraphExample implements Graph {
 	}
 	
 	public void addEdge(String fromNode, String toNode, Double cost) {
+		if (cost < this.low || cost > this.high) {
+			throw new IllegalArgumentException("Cost must be in the cost interval of the graph.");
+		}
 		Node from = new NodeExample(fromNode);
 		Node to = new NodeExample(toNode);
 
