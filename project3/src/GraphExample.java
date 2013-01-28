@@ -90,9 +90,11 @@ public class GraphExample implements Graph {
 		if(!this.hasNode(from.getLabel()) || !this.hasNode(to.getLabel())) {
 			throw new IllegalArgumentException("Nodes not found");
 		}
-		//return pathExists(from, to, new Vector<Edge>(this.edges));
-		Map<Node, Vector<Edge>> map = this.generateMap();
-		return pathExists(from, to, map, new Vector<Node>());
+
+		Map<Node,Vector<Edge>> map = this.generateMap();
+		Path p = this.generatePath(from, to, map, new Vector<Node>(), new PathExample());
+		
+		return p != null;
 	}
 	
 	
@@ -116,7 +118,6 @@ public class GraphExample implements Graph {
 		Boolean f, t; 
 		f = this.hasNode(fromNode);
 		t = this.hasNode(toNode);
-		
 		if ( f && t ) {
 			if(this.checkTriangularInequality(e)) {
 				this.edges.add(e);
@@ -175,6 +176,7 @@ public class GraphExample implements Graph {
 		visited.add(from);
 		
 		Vector<Edge> fromEdges = map.get(from);
+
 		
 		if (from.equals(to)) {
 			// you found a path, return
@@ -216,31 +218,9 @@ public class GraphExample implements Graph {
 			Collections.sort(v, new EdgeComparator());
 			map.put(n, v);
 		}
-		return map;
-	}
-	
-	// Recursive method to determine whether or not a path exists between the 
-	// given nodes.
-	private Boolean pathExists(Node from, Node to, Map<Node, Vector<Edge>> map,
-			Vector<Node> visited) {
-		
-		Vector<Edge> fromEdges = map.get(from);
 
-		if (from.equals(to)) {
-			// you found a path, return
-			return true;
-		} else {
-			for (Edge e : fromEdges) {
-				if(visited.contains(e.getDest())) {
-					continue;
-				} else {
-					if(this.pathExists(e.getDest(), to, map, visited)) {
-						return true;
-					}
-				}
-			}
-			return false;
-		}
+
+		return map;
 	}
 	
 	// Returns true if triangular inequality is not violated. Checks the three

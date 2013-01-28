@@ -396,37 +396,26 @@ public class GraphReader {
 		Graph graph;
 		Double cost;
 		
-		graphName = attributes.getNamedItem("graph").getNodeValue();
-		from = attributes.getNamedItem("from").getNodeValue();
-		to = attributes.getNamedItem("to").getNodeValue();
-		
-		if (graphName.equals("")) {
-			return this.xmlError("graph must be present and non empty");
-		}
-		if (from.equals("")) {
-			return this.xmlError("from must be present and non empty");
-		}
-		if (to.equals("")) {
-			return this.xmlError("to must be present and non empty");
+		try {
+			from = attributes.getNamedItem("from").getNodeValue();
+			to = attributes.getNamedItem("to").getNodeValue();
+			graph = this.makeGraph(root.getFirstChild());	
+		} catch (NullPointerException e) {
+			return this.xmlError("From and to attributes must be present and non-null.");
+		} catch (IllegalArgumentException e) {
+			return this.xmlError(e.getMessage());
 		}
 		
-		if (!this.server.hasGraph(graphName)) {
-			return this.xmlError("graph not found in server");
+		if (root.getFirstChild().getNextSibling() != null) {
+			return this.xmlError("Path request can only accept one graph.");
 		}
-		
-		graph = this.server.getGraph(graphName);
 
-		if (DEBUG) { System.out.println("From node: " + from + "\n To node: " + to);
+		try {
+			origin = graph.getNode(from);
+			dest = graph.getNode(to);
+		} catch (RuntimeException e) {
+			return this.xmlError("Nodes are not present in the graph.");
 		}
-		if (!graph.hasNode(from)) {
-			return this.xmlError("from not found in graph");
-		}
-		if (!graph.hasNode(to)) {
-			return this.xmlError("to not found in graph");
-		}
-		
-		origin = graph.getNode(from);
-		dest = graph.getNode(to);
 		
 		if (!graph.pathExists(origin, dest)) {
 			return "<false />";

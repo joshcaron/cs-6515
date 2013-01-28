@@ -18,10 +18,15 @@ public class NodeExample implements Node {
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof Node) {
-			return this.getLabel().equals(((Node) o).getLabel());
+			return this.getLabel().equals(((NodeExample) o).getLabel());
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	public int hashCode() {
+		return this.label.hashCode();
 	}
 
 }
