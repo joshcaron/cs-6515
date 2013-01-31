@@ -1,0 +1,9 @@
+<new low="0.0" high="5.0" />
+<edges>
+	<graph low="1.0" high="5.0">
+		<edge from="a" to="b" cost="3.0" />
+		<edge from="b" to="c" cost="2.0" />
+	</graph>
+	<graph low="2.0" high="3.0">
+	</graph>
+</edges>

@@ -1,0 +1,18 @@
+<error msg="Something about triangular inequality." />
+<graph low="1.0" high="10.0">
+	<edge to="a" from="c" cost="2.0" />
+	<edge to="b" from="c" cost="3.0" />
+	<edge to="a" from="b" cost="1.0" />
+</graph>
+
+<edges>
+	<edge to="c" from="a" cost="2.0" />
+	<edge to="b" from="c" cost="3.0" />
+	<edge to="b" from="a" cost="1.0" />
+</edges>
+
+<nodes>
+	<node name="a" />
+	<node name="b" />
+	<node name="c" />
+</nodes>

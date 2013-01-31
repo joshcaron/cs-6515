@@ -1,0 +1,27 @@
+<error msg="Something about cost interval" />
+
+<graph low="1.0" high="5.0">
+	<edge from="a" to="b" cost="3.0" />
+	<edge from="c" to="b" cost="3.0" />
+	<edge from="e" to="d" cost="4.0" />
+	<edge from="d" to="f" cost="1.0" />
+	<edge from="f" to="e" cost="3.14" />
+</graph>
+
+<graph low="1.0" high="5.0">8
+	<edge from="a" to="b" cost="3.0" />
+	<edge from="c" to="b" cost="3.0" />
+	<edge from="e" to="d" cost="4.0" />
+	<edge from="d" to="f" cost="1.0" />
+	<edge from="f" to="e" cost="3.14" />
+	<edge from="d" to="c" cost="2.2" />
+</graph>	
+
+<path cost="12.34">
+	<edge from="f" to="e" cost="3.14" />
+	<edge from="e" to="d" cost="4.0" />
+	<edge from="d" to="c" cost="2.2" />
+	<edge from="b" to="c" cost="3.0" />
+</path>
+
+<false />

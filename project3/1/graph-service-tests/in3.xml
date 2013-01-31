@@ -1,0 +1,52 @@
+<join>
+	<graph low="1.0" high="5.0">
+		<edge from="a" to="b" cost="3.0" />
+		<edge from="c" to="b" cost="3.0" />
+	</graph>
+	<graph low="2.0" high="3.0">
+	</graph>
+</join>
+
+<join>
+	<graph low="1.0" high="5.0">
+		<edge from="a" to="b" cost="3.0" />
+		<edge from="c" to="b" cost="3.0" />
+	</graph>
+	<graph low="1.0" high="5.0">
+		<edge from="e" to="d" cost="4.0" />
+		<edge from="d" to="f" cost="1.0" />
+		<edge from="f" to="e" cost="3.14" />
+	</graph>
+</join>
+
+<add from="d" to="c" cost="2.2">
+	<graph low="1.0" high="5.0">
+		<edge from="a" to="b" cost="3.0" />
+		<edge from="c" to="b" cost="3.0" />
+		<edge from="e" to="d" cost="4.0" />
+		<edge from="d" to="f" cost="1.0" />
+		<edge from="f" to="e" cost="3.14" />
+	</graph>
+</add>
+
+<path from="f" to="b">
+	<graph low="1.0" high="5.0">8
+		<edge from="a" to="b" cost="3.0" />
+		<edge from="c" to="b" cost="3.0" />
+		<edge from="e" to="d" cost="4.0" />
+		<edge from="d" to="f" cost="1.0" />
+		<edge from="f" to="e" cost="3.14" />
+		<edge from="d" to="c" cost="2.2" />
+	</graph>	
+</path>
+
+<path from="f" to="a">
+	<graph low="1.0" high="5.0">8
+		<edge from="a" to="b" cost="3.0" />
+		<edge from="c" to="b" cost="3.0" />
+		<edge from="e" to="d" cost="4.0" />
+		<edge from="d" to="f" cost="1.0" />
+		<edge from="f" to="e" cost="3.14" />
+		<edge from="d" to="c" cost="2.2" />
+	</graph>	
+</path>

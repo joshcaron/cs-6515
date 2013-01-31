@@ -1,0 +1,2 @@
+#! /bin/sh
+java -jar service.jar &> log.txt

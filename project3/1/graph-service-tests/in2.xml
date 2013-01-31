@@ -1,0 +1,29 @@
+<add from="a" to="b" cost="8.0">
+	<graph low="1.0" high="10.0">
+		<edge to="c" from="a" cost="2.0" />
+		<edge to="b" from="c" cost="3.0" />
+	</graph>
+</add>
+
+<add from="a" to="b" cost="1.0">
+	<graph low="1.0" high="10.0">
+		<edge to="c" from="a" cost="2.0" />
+		<edge to="b" from="c" cost="3.0" />
+	</graph>
+</add>
+
+<edges>
+	<graph low="1.0" high="10.0">
+		<edge to="c" from="a" cost="2.0" />
+		<edge to="b" from="c" cost="3.0" />
+		<edge to="b" from="a" cost="1.0" />
+	</graph>
+</edges>
+
+<nodes>
+	<graph low="1.0" high="10.0">
+		<edge to="c" from="a" cost="2.0" />
+		<edge to="b" from="c" cost="3.0" />
+		<edge to="b" from="a" cost="1.0" />
+	</graph>
+</nodes>
