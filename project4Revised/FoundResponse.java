@@ -1,7 +1,8 @@
+import java.util.Vector;
 public class FoundResponse extends Response {
-    private List<HLabel> hotels
+    private Vector<HLabel> hotels;
 
-    FoundResponse(List<HLabel> hotels) {
+    FoundResponse(Vector<HLabel> hotels) {
         super(Response.FOUND);
         this.hotels = hotels;
     }
@@ -12,7 +13,7 @@ public class FoundResponse extends Response {
     @Override
     public FoundResponse asFoundResponse() { return this; }
 
-    public List<HLabel> getPossibleHotels() { return this.hotels; }
+    public Vector<HLabel> getPossibleHotels() { return this.hotels; }
 
     public Integer numberOfPossibleHotels() { return this.hotels.size(); }
 }

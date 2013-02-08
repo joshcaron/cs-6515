@@ -22,25 +22,25 @@ public abstract class Response {
 
     public boolean isMergeResponse() { return false; }
 
-    public boolean isImpossible() { return false; }
+    public boolean isImpossibleResponse() { return false; }
 
-    public boolean asSingletonResponse() { 
+    public SingletonResponse asSingletonResponse() { 
         throw new ClassCastException("Invalid ResponseType Cast"); 
     }
 
-    public boolean asGrowResponse() { 
+    public GrowResponse asGrowResponse() { 
         throw new ClassCastException("Invalid ResponseType Cast"); 
     }
 
-    public boolean asFoundResponse() { 
+    public FoundResponse asFoundResponse() { 
         throw new ClassCastException("Invalid ResponseType Cast"); 
     }
 
-    public boolean asMergeResponse() { 
+    public MergeResponse asMergeResponse() { 
         throw new ClassCastException("Invalid ResponseType Cast"); 
     }
 
-    public boolean asImpossible() { 
+    public ImpossibleResponse asImpossibleResponse() { 
         throw new ClassCastException("Invalid ResponseType Cast"); 
     }
 }

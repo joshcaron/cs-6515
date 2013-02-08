@@ -1,8 +1,10 @@
-public class MergeResponse extends Response {
-    private List<HLabel> canAcquire;
-    private List<HLabel> canBeAcquired;
+import java.util.Vector;
 
-    MergeResponse(List<HLabel> canAcquire, List<HLabel> canBeAcquired) {
+public class MergeResponse extends Response {
+    private Vector<HLabel> canAcquire;
+    private Vector<HLabel> canBeAcquired;
+
+    MergeResponse(Vector<HLabel> canAcquire, Vector<HLabel> canBeAcquired) {
         super(Response.MERGE);
         this.canAcquire = canAcquire;
         this.canBeAcquired = canBeAcquired;
@@ -14,9 +16,9 @@ public class MergeResponse extends Response {
     @Override
     public MergeResponse asMergeResponse() { return this; }
 
-    public List<HLabel> getPossibleAcquirerers() { return this.canAcquire; }
+    public Vector<HLabel> getPossibleAcquirerers() { return this.canAcquire; }
 
-    public List<HLabel> getAcquirees() { return this.canBeAcquired; }
+    public Vector<HLabel> getAcquirees() { return this.canBeAcquired; }
 
     public Integer numberPossibleAcquirerers() { return this.canAcquire.size(); }
 

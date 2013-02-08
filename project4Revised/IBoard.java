@@ -1,4 +1,4 @@
-import java.util.List;
+import java.util.Vector;
 
 // The External API of the representation of an Acquire Game Board.
 // 
@@ -6,9 +6,9 @@ public interface IBoard {
     
     public Response query(Location loc);
 
-    public List<Tile> getSingletons();
+    public Vector<Tile> getSingletons();
 
-    public List<Hotel> getHotels();
+    public Vector<Hotel> getHotels();
 
     public boolean hotelInPlay(HLabel label);
 
@@ -36,6 +36,6 @@ public interface IBoard {
     
     public void mergeHotels(Location loc, HLabel label) throws Exception;
     
-    public Neighbors getNeighboringTiles(Location loc);
+    public Vector<Tile> getNeighboringTiles(Location loc);
 
 }

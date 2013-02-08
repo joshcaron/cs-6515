@@ -1,7 +1,7 @@
-public class Impossible extends Response {
+public class ImpossibleResponse extends Response {
     private String message;
 
-    Impossible(String message) {
+    ImpossibleResponse(String message) {
         super(Response.IMPOSSIBLE);
         this.message = message;
     }
@@ -14,9 +14,9 @@ public class Impossible extends Response {
 
     public boolean isMergeResponse() { return false; }
 
-    public boolean isImpossible() { return true; }
+    public boolean isImpossibleResponse() { return true; }
 
-    public Impossible asImpossible() { return this; }
+    public ImpossibleResponse asImpossibleResponse() { return this; }
 
     public String getMessage() { return this.message; }
 }

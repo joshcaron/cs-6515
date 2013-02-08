@@ -22,7 +22,7 @@ public abstract class Tile {
     public abstract boolean isSingleton();
 
     // A Comparator over Tiles, which compares the Tiles by Location.
-    private static class TileComparator extends Comparator<Tile> {
+    private static class TileComparator implements Comparator<Tile> {
 
         public int compare(Tile t1, Tile t2) {
             return t1.getLocation().compareTo(t2.getLocation());
